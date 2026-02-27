@@ -115,7 +115,8 @@ Vague name, tests mock not code
 **MANDATORY. Never skip.**
 
 ```bash
-npm test path/to/test.test.ts
+# Use vitest for TAM project (primary), jest as fallback
+npx vitest run path/to/test.test.js
 ```
 
 Confirm:

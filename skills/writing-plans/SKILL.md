@@ -15,7 +15,9 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
-**Save plans to:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
+**Before starting:** Read `docs/dev/STATUS.md` to understand current phase. Check `.cursor/rules/agent-locks.mdc` for file boundaries. Tasks must reference the relevant phase file (`docs/dev/phases/phase-N-*.md`).
+
+**Save plans to:** `docs/dev/plans/YYYY-MM-DD-<feature-name>.md`
 
 ## Bite-Sized Task Granularity
 
