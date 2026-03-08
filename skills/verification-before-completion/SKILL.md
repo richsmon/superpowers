@@ -130,6 +130,20 @@ From 24 failure memories:
 - Implications of success
 - ANY communication suggesting completion/correctness
 
+## Role Skill Verification
+
+For features in specific domains, verification goes beyond "tests pass":
+
+| Domain | Additional Verification | Consult Skill |
+|--------|------------------------|---------------|
+| PII / user data | Data minimization, retention policy, consent flow works | `superpowers:compliance-officer` |
+| Auth / security | OWASP checklist, no secrets in code, security headers present | `superpowers:security-engineer` |
+| API endpoints | Contract matches spec, error responses correct, rate limiting works | `superpowers:backend-engineer` |
+| Database changes | Migration runs forward AND back, indexes exist, no N+1 queries | `superpowers:database-architect` |
+| UI changes | Accessibility (keyboard nav, screen reader), responsive, Core Web Vitals | `superpowers:frontend-engineer` |
+| Infrastructure | IaC applies clean, health checks pass, monitoring configured | `superpowers:devops-engineer` |
+| Production readiness | SLOs defined, alerts configured, runbook exists | `superpowers:sre-engineer` |
+
 ## The Bottom Line
 
 **No shortcuts for verification.**

@@ -89,12 +89,33 @@ git commit -m "feat: add specific feature"
 ```
 ````
 
+## Consulting Role Skills
+
+Before writing the plan, identify which domain expertise is relevant and consult the appropriate role skills:
+
+- **superpowers:tech-lead** — Task breakdown, coding standards, PR process, Definition of Done
+- **superpowers:qa-engineer** — Test strategy (unit/integration/E2E split, test data management)
+- **superpowers:it-architect** — If tasks involve architectural decisions or cross-service changes
+- **superpowers:security-engineer** — If tasks involve auth, encryption, or security-sensitive code
+- **superpowers:compliance-officer** — If tasks involve PII, user data, or consent flows
+- **superpowers:database-architect** — If tasks involve schema changes or migrations
+- **superpowers:devops-engineer** — If tasks involve CI/CD, infrastructure, or deployment changes
+
+Reference the relevant role skill in the task description so the implementer knows which expertise to apply.
+
 ## Remember
 - Exact file paths always
 - Complete code in plan (not "add validation")
 - Exact commands with expected output
-- Reference relevant skills with @ syntax
+- Reference relevant skills with @ syntax (including role skills for domain expertise)
 - DRY, YAGNI, TDD, frequent commits
+
+## Session Logging
+
+If a session log exists (`docs/sessions/YYYY-MM/YYYY-MM-DD-<nick>.md`), update it:
+
+- **Work Log:** `### HH:MM — Plan created: <feature name>` with link to plan file and task count
+- **Decisions Made:** Record any architectural or technical decisions made during planning
 
 ## Execution Handoff
 

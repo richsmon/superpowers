@@ -55,6 +55,24 @@ digraph brainstorming {
 
 **The terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is writing-plans.
 
+## Consulting Role Skills
+
+During design, consult relevant domain experts for informed decisions:
+
+| Design Area | Consult Skill | When |
+|-------------|--------------|------|
+| System architecture, tech stack | `superpowers:it-architect` | Always for new systems or major features |
+| Frontend components, UI/UX | `superpowers:frontend-engineer` | When design involves user-facing UI |
+| API design, backend logic | `superpowers:backend-engineer` | When design involves server-side work |
+| Data model, storage decisions | `superpowers:database-architect` | When design involves data persistence |
+| Infrastructure, deployment | `superpowers:devops-engineer` | When design affects deployment or infra |
+| ML/AI integration | `superpowers:ai-ml-engineer` | When design involves AI/ML features |
+| Personal data, compliance | `superpowers:compliance-officer` | When design involves PII, user data, or regulated domains |
+| Security implications | `superpowers:security-engineer` | When design involves auth, encryption, or sensitive operations |
+| Reliability requirements | `superpowers:sre-engineer` | When design has SLA/availability requirements |
+
+You don't need every skill for every design. Pick the ones relevant to the domain.
+
 ## The Process
 
 **Understanding the idea:**
@@ -68,12 +86,14 @@ digraph brainstorming {
 - Propose 2-3 different approaches with trade-offs
 - Present options conversationally with your recommendation and reasoning
 - Lead with your recommended option and explain why
+- Consult relevant role skills (see table above) for domain-specific trade-offs
 
 **Presenting the design:**
 - Once you believe you understand what you're building, present the design
 - Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced
 - Ask after each section whether it looks right so far
 - Cover: architecture, components, data flow, error handling, testing
+- If handling personal data, verify GDPR/PII compliance with `superpowers:compliance-officer`
 - Be ready to go back and clarify if something doesn't make sense
 
 ## After the Design
@@ -86,6 +106,14 @@ digraph brainstorming {
 **Implementation:**
 - Invoke the writing-plans skill to create a detailed implementation plan
 - Do NOT invoke any other skill. writing-plans is the next step.
+
+## Session Logging
+
+If a session log exists (`docs/sessions/YYYY-MM/YYYY-MM-DD-<nick>.md`), update it:
+
+- **Work Log:** `### HH:MM — Brainstorming: <topic>` when starting
+- **Decisions Made:** Record the chosen approach and rationale when design is approved
+- **Work Log:** `### HH:MM — Design approved: <topic>` with link to design doc
 
 ## Key Principles
 

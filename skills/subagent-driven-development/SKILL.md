@@ -235,3 +235,26 @@ Done!
 
 **Subagents should use:**
 - **superpowers:test-driven-development** - Subagents follow TDD for each task
+
+**Role skills for domain expertise:**
+
+When dispatching implementer subagents, include relevant role skills in the prompt based on the task domain:
+
+| Task Domain | Include Skill | Why |
+|-------------|--------------|-----|
+| API endpoints, backend logic | `superpowers:backend-engineer` | API design standards, error handling, auth patterns |
+| UI components, pages | `superpowers:frontend-engineer` | Component patterns, accessibility, performance |
+| Database schema, queries | `superpowers:database-architect` | Indexing, migrations, query optimization |
+| Infrastructure, CI/CD | `superpowers:devops-engineer` | IaC patterns, deployment strategy |
+| ML/AI features | `superpowers:ai-ml-engineer` | Model integration, RAG, prompt engineering |
+| Auth, encryption, security | `superpowers:security-engineer` | OWASP, input validation, secure patterns |
+| PII, consent, compliance | `superpowers:compliance-officer` | GDPR, data minimization, audit logging |
+
+Tell the implementer: "For this task, follow the guidelines from `superpowers:<skill-name>`."
+
+**Session logging:**
+
+If a session log exists (`docs/sessions/YYYY-MM/YYYY-MM-DD-<nick>.md`), update it after each task:
+
+- **Work Log:** `### HH:MM — Task N complete: <task name>` with commit hash
+- **Issues & Blockers:** Log any problems encountered during implementation or review

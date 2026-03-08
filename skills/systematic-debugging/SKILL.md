@@ -287,6 +287,13 @@ These techniques are part of systematic debugging and available in this director
 - **superpowers:test-driven-development** - For creating failing test case (Phase 4, Step 1)
 - **superpowers:verification-before-completion** - Verify fix worked before claiming success
 
+**Role skills for domain-specific debugging:**
+- **superpowers:sre-engineer** — For production incidents: incident response, monitoring, SLO burn rate analysis, postmortem process
+- **superpowers:security-engineer** — If the bug has security implications (data leak, auth bypass, injection), consult for threat assessment and secure fix patterns
+- **superpowers:database-architect** — For database-related issues: slow queries (EXPLAIN analysis), migration failures, connection pool exhaustion
+- **superpowers:devops-engineer** — For infrastructure/deployment issues: CI failures, container problems, environment drift
+- **superpowers:backend-engineer** — For API issues: error handling, race conditions, integration failures
+
 ## Real-World Impact
 
 From debugging sessions:

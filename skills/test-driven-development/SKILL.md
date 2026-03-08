@@ -355,6 +355,12 @@ Bug found? Write failing test reproducing it. Follow TDD cycle. Test proves fix 
 
 Never fix bugs without a test.
 
+## Role Skill Integration
+
+- **superpowers:qa-engineer** — Consult for broader test strategy (test pyramid, E2E vs integration, test data management, load testing). TDD covers the red-green-refactor cycle; QA Engineer covers what and how much to test.
+- **superpowers:security-engineer** — When writing tests for auth, input validation, or security-sensitive code, consult for OWASP-relevant test cases.
+- **superpowers:compliance-officer** — When testing features that handle PII, verify that tests cover data minimization, erasure, and consent flows.
+
 ## Testing Anti-Patterns
 
 When adding mocks or test utilities, read @testing-anti-patterns.md to avoid common pitfalls:
