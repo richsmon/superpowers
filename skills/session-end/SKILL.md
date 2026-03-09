@@ -156,16 +156,37 @@ git push origin $(git branch --show-current)
 
 ### Step 8: Slack Notification (Optional)
 
-If the team uses Slack and a webhook or MCP is configured, send a structured report.
+Send a structured session report to the team's status channel. Try methods in order; skip silently if none are configured.
 
-**Check for Slack webhook:**
+**Method 1 — Slack MCP (preferred in Cursor):**
+
+If the Slack MCP plugin is available (server: `plugin-slack-slack`):
+
+1. Determine the status channel:
+   - Check project Cursor rules for a defined session status channel
+   - Or check env var: `$SLACK_STATUS_CHANNEL` (channel name without `#`)
+   - If neither is set, skip Slack notification
+2. Resolve channel ID via `slack_search_channels` with `channel_types: "public_channel,private_channel"` (teams often use private channels)
+3. Send the report via `slack_send_message`:
+
+```
+CallMcpTool(server="plugin-slack-slack", toolName="slack_send_message", arguments={
+  "channel_id": "<resolved channel ID>",
+  "message": "*Session Report — <nick>*\n*Date:* YYYY-MM-DD | *Branch:* <branch> | *Duration:* ~Xh | *Commits:* N\n\n*Completed:*\n- item 1\n- item 2\n\n*Next:*\n<handoff summary>\n\n*Blockers:*\n<blockers or 'None'>"
+})
+```
+
+Message format uses Slack mrkdwn: `*bold*`, `_italic_`, `\n` for newlines. Do NOT use markdown `**bold**`.
+
+**Method 2 — Webhook (CI, Claude Code, non-Cursor):**
+
+If MCP is not available, check `$SLACK_SESSION_WEBHOOK`:
 
 ```bash
-# Check environment variable
 echo "${SLACK_SESSION_WEBHOOK:-not configured}"
 ```
 
-**If configured, send via curl:**
+If configured, send via curl with Block Kit:
 
 ```bash
 curl -s -X POST "$SLACK_SESSION_WEBHOOK" \
@@ -197,16 +218,7 @@ curl -s -X POST "$SLACK_SESSION_WEBHOOK" \
   }'
 ```
 
-**If Slack MCP is available, use it instead:**
-
-```
-CallMcpTool(server="slack", tool="send_message", arguments={
-  channel: "#dev-updates",
-  blocks: [...]
-})
-```
-
-**If no Slack is configured:** skip silently, no error. The session log in git is the primary record.
+**Method 3 — No Slack configured:** skip silently, no error. The session log in git is the primary record.
 
 ### Step 9: Present Closing Summary
 
