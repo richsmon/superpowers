@@ -76,17 +76,53 @@ These thoughts mean STOP—you're rationalizing:
 
 When multiple skills could apply, use this order:
 
-1. **Process skills first** (brainstorming, debugging) - these determine HOW to approach the task
-2. **Implementation skills second** (frontend-design, mcp-builder) - these guide execution
+1. **Process skills first** (brainstorming, writing-plans, debugging) - these determine HOW to approach the task
+2. **Role skills second** - consult domain experts for specialized decisions:
+   - Architecture/design → `it-architect`
+   - Frontend work → `frontend-engineer`
+   - API/backend work → `backend-engineer`
+   - Infrastructure/CI/CD → `devops-engineer`
+   - Data modeling/queries → `database-architect`
+   - ML/AI features → `ai-ml-engineer`
+   - Test strategy → `qa-engineer`
+   - Production issues → `sre-engineer`
+   - Security concerns → `security-engineer`
+   - PII/GDPR/ISO 27001 → `compliance-officer`
+   - Code review/tech debt → `tech-lead`
+   - Prioritization/MVP → `product-engineer`
+3. **Implementation skills third** (frontend-design, mcp-builder) - these guide execution
 
-"Let's build X" → brainstorming first, then implementation skills.
-"Fix this bug" → debugging first, then domain-specific skills.
+"Let's build X" → brainstorming first, then role skills for domain guidance, then implementation.
+"Fix this bug" → debugging first, then relevant role skill (e.g., `sre-engineer` for prod, `database-architect` for DB).
+"Handle user data" → `compliance-officer` MUST be invoked for any PII/personal data work.
+
+## Session Awareness
+
+If a session is active (a session log exists at `docs/sessions/YYYY-MM/YYYY-MM-DD-<nick>.md`):
+- **Log significant decisions, completions, and issues** into the session log
+- Process skills (brainstorming, writing-plans, subagent-driven-development) do this automatically
+- For ad-hoc work outside those flows, append a brief entry yourself
+
+Session commands:
+- `/zaciname` — start a work session (creates log, gathers context, sets daily plan)
+- `/koncime` — end a session (summarize, commit, push, optional Slack notification)
+
+## Compliance Gate
+
+**Automatic trigger** — invoke `compliance-officer` skill when any of these apply:
+- Task involves user/personal data (names, emails, IDs, addresses, health, financial)
+- New data storage, collection, or processing is being designed
+- Third-party integrations that receive or send personal data
+- Logging, analytics, or tracking that could capture PII
+- Data export, migration, or deletion features
+
+This is not optional. GDPR fines are real. When in doubt, invoke it.
 
 ## Skill Types
 
 **Rigid** (TDD, debugging): Follow exactly. Don't adapt away discipline.
 
-**Flexible** (patterns): Adapt principles to context.
+**Flexible** (patterns, role skills): Adapt principles to context.
 
 The skill itself tells you which.
 
