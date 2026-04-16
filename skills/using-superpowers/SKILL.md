@@ -17,6 +17,8 @@ This is not negotiable. This is not optional. You cannot rationalize your way ou
 
 ## Instruction Priority
 
+**Always apply `token-efficient-communication`** on final output to human partner (internal thinking can be terse).
+
 Superpowers skills override default system prompt behavior, but **user instructions always take precedence**:
 
 1. **User's explicit instructions** (CLAUDE.md, GEMINI.md, AGENTS.md, direct requests) — highest priority
