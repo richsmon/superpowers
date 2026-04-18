@@ -1,5 +1,26 @@
 # Changelog
 
+## [richsmon-fork] - 2026-04-18
+
+### Added (fork-only — brain-first workflow)
+
+- **8 brain-* skills** for the brain-first workflow, where the user stays in the `tam-brain` repo and dispatches agents to sibling code repos:
+  - `brain-link-repo` — register a code repo as a workspace's implementation target (`repo:` block in `graph/entities/{name}.yaml`)
+  - `brain-dispatch` — spawn a coding agent (inline subagent or Paperclip task) on the linked repo with bundled brain context (spec, plan, decisions, dependency manifest, constraints)
+  - `brain-status` — one-screen overview of active workspaces, linked repos, today's session, recent decisions
+  - `brain-new-workspace` — bootstrap `workspaces/{name}/` with standard structure + `project` entity stub + REPO_KNOWLEDGE.md row
+  - `brain-new-feature` — create `workspaces/{w}/features/{f}/` with spec.md + plan.md stub, optionally chaining `brainstorming` → `write-feature-spec` → `writing-plans`
+  - `brain-reflect` — triage takeaways from completed work into atomic notes / decisions / entity updates / follow-ups
+  - `brain-route` — triage where a piece of work belongs (brain vs code repo) using a routing rubric
+  - `brain-checkpoint` — quick mid-work commit: detects state, fills gaps (session entry, "Next" items, stale `lastUpdated:`), proposes message, commits locally (no auto-push)
+- **8 thin slash-command wrappers** in `commands/` (matches existing `commands/brain-*` convention from upstream brain wrappers like `brain-log-decision`, `brain-session-start`)
+
+### Notes
+
+- These are fork-only extensions; not for upstream PR (per upstream `CLAUDE.md` — "Domain-specific skills … belong in their own standalone plugin").
+- Designed to compose with vendor `paperclip*` skills (installed by `paperclipai` CLI in `~/.cursor/skills/`) — `brain-dispatch` invokes `paperclip` skill in Paperclip mode, no copy/vendor needed.
+- Source of truth for the brain-first workflow design: `tam-brain/meta/brain-first-workflows.md` and `tam-brain/decisions/2026-04-18-brain-skills-in-superpowers-fork.md`.
+
 ## [5.0.5] - 2026-03-17
 
 ### Fixed
