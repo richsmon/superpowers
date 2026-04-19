@@ -35,6 +35,54 @@ The skill reads context from:
 2. **The most recent "Dispatched: ..." entry** in that session, if present
 3. **Free-text takeaways** — ask the user: "What's worth remembering from this work?"
 
+## Task-outcome mode (auto-update tracker)
+
+When invoked with a task ID and outcome — explicit `--task T-NN --outcome <state>`, or implicit after a `brain-dispatch` returned with task-mode context — perform tracker updates BEFORE the normal triage flow.
+
+### Trigger detection
+
+- Explicit: user says "reflect T-NN done", "reflect T-NN blocked", "reflect T-NN in-progress"
+- Optional flag: `--task T-NN --outcome <state>` where state is one of `done` | `in-progress` | `blocked`
+- Implicit: previous `brain-dispatch` invocation surfaced a task ID and the subagent has just returned
+
+### Auto-tracker updates
+
+For task `T-NN` in workspace `W` with outcome `O`:
+
+1. **`workspaces/W/tasks.md` row update:**
+   - `Status` column → `O`
+   - `Updated` column → today's date
+   - `Verified` column → today's date (ONLY if `O = done`)
+   - `Notes` column → append a short note from the agent summary (truncate to ~80 chars; longer learnings go to atomic notes via the standard triage flow)
+
+2. **`workspaces/W/STATUS.md` updates:**
+   - `**Updated:**` line → today's date and time
+   - If `O = done`: remove T-NN row from "In flight" table; add to "Recently shipped" with format `- YYYY-MM-DD — {title} (commit {hash} or PR link)`
+   - If `O = in-progress`: ensure T-NN row exists in "In flight" with current `Owner` and `Started` date; refresh `Notes` cell
+   - If `O = blocked`: remove from "In flight"; add to "Blocked / waiting" with explicit blocker reason
+
+3. **`workspaces/W/tasks.md` "Dispatch history" append:**
+   - Compute next dispatch number by counting existing entries in the section
+   - Format: `- YYYY-MM-DD dispatch #N — T-NN <one-line subject> — <O> — see sessions/YYYY-MM-DD-*.md` (commit/PR link if available)
+
+4. **`graph/entities/W.yaml` bump:** `lastUpdated:` → today's date. If `O = done`, optionally append a one-line milestone note to `content:` (do not silently rewrite history; append).
+
+5. **THEN run the normal triage flow** (Step 2 onward of the standard process) for any additional learnings, decisions, atomic notes, follow-ups the user surfaces beyond the tracker mechanics.
+
+### Refusing auto-mode
+
+Abort and ask the user to clarify if:
+
+- T-NN does not exist in `workspaces/W/tasks.md` (typo or wrong workspace)
+- T-NN's status was already `O` (avoid double-counting in dispatch history)
+- `O = done` but the agent summary did not include baseline test results (per `MEMORY.md` 2026-04-19 dispatch-slice rule, claiming `done` requires baseline verification)
+
+### What NOT to do in auto-mode
+
+- Never auto-commit. Tracker updates are git changes; the user (or `session-end`) decides when to commit.
+- Never auto-progress to the next task. Each loop tick is a deliberate human decision.
+- Never close a phase even if every scoped task is `done`. Phase closure requires verifying success criteria, which are behavioral checkboxes that need human judgment.
+
 ## Process
 
 ### 1. Identify the work being reflected on
@@ -108,5 +156,6 @@ Brain is up to date.
 ## Notes
 
 - This is a routing skill: it doesn't replace `log-decision`, `log-blocker`, or `session-end` — it orchestrates them.
-- Related: `brain-dispatch` (produces the work being reflected on), `log-decision`, `log-blocker`, `session-end`.
+- Related: `brain-next` (recommends the task that produced the work), `brain-dispatch` (produces the work being reflected on; use task-mode for auto-context), `log-decision`, `log-blocker`, `session-end`.
+- Per-task loop: `brain-next` → `brain-dispatch --task T-NN` → [read output] → `brain-reflect --task T-NN --outcome <state>` → `brain-next` again.
 - Reflection should happen WHILE memory is fresh — at the latest within the same session. Tomorrow is too late.

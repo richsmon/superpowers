@@ -39,6 +39,48 @@ Same as `log-decision` / `session-start`:
 
 If the user doesn't specify, ask: "Inline (blocking, results in this session) or Paperclip (async, tracked as issue, runs in heartbeats)?"
 
+## Task-mode dispatch (auto-context)
+
+When the user references a tracker task ID (`dispatch T-03`, `dispatch next`, or you have a recommendation from `brain-next`), use auto-context bundling instead of manual file selection. This is the standard mode for any workspace that has the 5-artifact tracking system (`tasks.md` + `phases/`).
+
+### Trigger detection
+
+- Explicit: user says "dispatch T-NN", "dispatch next", "implement T-NN"
+- Implicit: just returned from `brain-next` with a recommendation in the conversation
+- Optional flag: `--task T-NN`
+
+### Process (auto-context)
+
+For task `T-NN` in workspace `W`:
+
+1. **Read tracker row.** Open `workspaces/W/tasks.md`, find the `T-NN` row. Extract: `Title`, `Phase`, `Status`, `Plan` (path), latest entries from "Dispatch history" section mentioning T-NN.
+
+2. **Verify in-phase scope.** Read `workspaces/W/STATUS.md` → "Active phase" line → read that phase file → confirm T-NN is in the "Scope — tasks in this phase" table. If NOT in active phase, ask the user to confirm out-of-phase dispatch (could be intentional, could be a mistake).
+
+3. **Refuse if status conflicts.** If T-NN is `done` (already finished) or `archived`, abort and ask the user to clarify intent. If `blocked`, surface the blocker reason and ask whether to proceed anyway.
+
+4. **Auto-bundle context** in this order:
+
+   - **Task header:** id, title, current status, plan path
+   - **Plan content:** full content of the plan markdown from `Plan` column
+   - **Active phase context:** vision (the 5-line block), success criteria, this task's "why in this phase" cell
+   - **Related feature plan:** if `workspaces/W/features/{slug}/plan.md` references T-NN, include the relevant phase section
+   - **STATUS snapshot:** current "In flight" + last 3 "Recently shipped" rows (so subagent knows recent context)
+   - **Dispatch history for T-NN:** all rows from `tasks.md` "Dispatch history" mentioning this task (so subagent doesn't repeat past attempts or contradict prior outcomes)
+   - **Baseline rule (REQUIRED):** explicit instruction per `MEMORY.md` 2026-04-19 rule — *"Before touching code, run the test suite and capture the baseline. STOP and report if the baseline is red; do not heroically fix unrelated tests."*
+   - **Standard constraints:** pinned-deps policy, brain-first reflection (no brain edits from inside the agent), repo working dir
+   - **Expected output:** subagent must return: outcome (one of: `done` | `in-progress` | `blocked`), files touched, commits made (hash + subject), baseline test counts before/after, learnings worth reflecting
+
+5. **Show the assembled prompt to the user for approval.** Do not auto-fire — the human must see what's bundled and confirm. Token cost of an unwanted dispatch is high.
+
+6. **Dispatch** via the chosen mechanism (Inline subagent or Paperclip — same as the existing modes). Pass the bundled prompt verbatim.
+
+7. **After return, hand off to `brain-reflect`** with the task context preserved. Strongly suggest the user invoke `brain-reflect --task T-NN --outcome <state>` so the tracker is updated automatically. Do NOT manually edit `tasks.md` from this skill — that's `brain-reflect`'s job in task-outcome mode.
+
+### Default values when not in task-mode
+
+If the user dispatches without a task ID (free-text task description, exploratory work, or a workspace that doesn't have tracking), fall through to the manual "Process" section below. Task-mode is opt-in by referencing T-NN.
+
 ## Process
 
 ### 1. Identify workspace + linked repo
@@ -149,4 +191,5 @@ When the inline subagent returns (or after a Paperclip heartbeat completes):
 
 - For long-running shell operations (npm install, builds), pass `block_until_ms` appropriately if using `Task` with `shell` subagent.
 - Secrets: never include API keys / tokens in the prompt. The dispatched agent reads them from its own env / SecureStore equivalent.
-- Related: `brain-link-repo` (must run once per workspace), `brain-status`, `brain-reflect`, `paperclip` (vendor skill, used in Paperclip mode), `dispatching-parallel-agents` (Superpowers, for the underlying multi-agent pattern).
+- Related: `brain-next` (recommends T-NN for task-mode), `brain-link-repo` (must run once per workspace), `brain-status`, `brain-reflect` (use task-outcome mode after dispatch returns), `paperclip` (vendor skill, used in Paperclip mode), `dispatching-parallel-agents` (Superpowers, for the underlying multi-agent pattern).
+- Per-task loop: `brain-next` → `brain-dispatch --task T-NN` → [read output] → `brain-reflect --task T-NN --outcome <state>` → `brain-next` again.
