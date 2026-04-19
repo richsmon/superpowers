@@ -26,10 +26,20 @@ Use this skill at the end of your workday or focused session to:
 Before anything else, find the `brain` repository:
 
 1. Check if the current workspace IS the brain repo (look for `AGENTS.md` + `REPO_KNOWLEDGE.md` in root)
-2. If not, check common sibling locations: `../brain`, `../../brain`
+2. If not, check common sibling locations: `../brain`, `../../brain`, `../tam-brain`, `../../tam-brain`
 3. If not found, ask the user for the path
 
 All file operations happen in the brain repo.
+
+## Locate Today's Session File(s)
+
+Sessions live under `workspaces/{w}/sessions/{YYYY-MM-DD}-{github-username}.md` (one per workspace touched today). Find them by:
+
+```bash
+ls workspaces/*/sessions/$(date +%F)-*.md 2>/dev/null
+```
+
+If multiple workspaces have today's session, run this skill once per workspace (or aggregate per-area audit and write to each). If none exist, create them via `session-start` first. Never look for or create files under root `sessions/` or `sessions/YYYY/MM/`.
 
 ## Area-Aware Repository Audit
 
@@ -78,7 +88,7 @@ Always respond in English per the `always-english-output` rule, even if the huma
 
 ## Template
 
-Locate today's session file at `sessions/YYYY/MM/YYYY-MM-DD-{github-username}.md`. If none exists, create one using the `session-start` template.
+Locate today's session file(s) at `workspaces/{w}/sessions/{YYYY-MM-DD}-{github-username}.md` (see "Locate Today's Session File(s)" above). If none exists for the relevant workspace, create one using the `session-start` template.
 
 Update the "End of day" section with this **per-area structure**:
 
