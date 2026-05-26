@@ -12,8 +12,9 @@ This skill is **strictly read-only**. It does not write any files. It exists to 
 ## Locate Brain Repo
 
 1. Check if current workspace is the brain (look for `AGENTS.md` + `REPO_KNOWLEDGE.md` + `meta/`)
-2. If not, check siblings: `../brain`, `../../brain`, `../tam-brain`
+2. If not, check siblings: `../brain`, `../../brain`
 3. If not found, ask the user
+4. **Sync state** — `git -C <brain> pull --rebase origin main` so the recommendation reflects the real tracking artifacts (stale STATUS.md / tasks.md silently picks the wrong next task). Verify `git -C <brain> branch --show-current` is `main`.
 
 ## When to Use
 

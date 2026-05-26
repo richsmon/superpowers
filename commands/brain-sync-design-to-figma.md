@@ -1,0 +1,5 @@
+---
+description: "Brain workflow — Claude Design → Figma sync pipeline (one-way, additive, multi-phase). Sub-flows: sync-design-system <repo> | sync-feature-screens <repo> <feature>. Lands on a brain/figma-* branch + PR, never on main."
+---
+
+Invoke **brain-sync-design-to-figma** + **figma:figma-use** (loaded when any write is planned per Phase 0 step 7) + **token-efficient-communication** skills. Load and follow `skills/brain-sync-design-to-figma/SKILL.md` exactly — Git Safety Protocol, **Commit Policy (feature branch + PR, NEVER main)**, **signed commit required for every per-substep commit (no signature → no commit, no bypass)**, sub-flow selection (`sync-design-system` or `sync-feature-screens`), flag confirmation, then execute Phases 0 → 5 from `meta/claude-design-to-figma-workflow.md` in the brain repo (the brain doc is the canonical procedure; this skill is the policy + invocation wrapper). Stop at Phase 3 HUMAN GATE. Apply `token-efficient-communication` to all final output. If your environment exposes a Skill tool, load both before acting.

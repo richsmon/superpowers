@@ -1,6 +1,6 @@
 {
-  "name": "superpowers-rs",
-  "version": "5.1.0",
+  "name": "rs-superpowers",
+  "version": "0.1.0",
   "type": "module",
   "main": ".opencode/plugins/superpowers.js"
 }

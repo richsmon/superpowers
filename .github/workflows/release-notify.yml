@@ -1,0 +1,12 @@
+name: release-notify
+
+on:
+  push:
+    tags: ['*']
+
+jobs:
+  notify:
+    uses: market-clue/brain/.github/workflows/release-notify.yml@main
+    secrets: inherit
+    permissions:
+      contents: read

@@ -12,8 +12,9 @@ This skill exists because the most common failure of brain-first workflow is put
 ## Locate Brain Repo
 
 1. Check if current workspace is the brain
-2. If not, check siblings: `../brain`, `../../brain`, `../tam-brain`
+2. If not, check siblings: `../brain`, `../../brain`
 3. If not found, ask the user
+4. **Sync state** — `git -C <brain> pull --rebase origin main` so routing decisions don't reference stale knowledge. Verify `git -C <brain> branch --show-current` is `main`.
 
 ## When to Use
 
@@ -66,7 +67,7 @@ Be specific. Not "this is brain knowledge", but:
 
 ```
 This is a reusable pattern → atomic note.
-→ workspaces/mr-brainer/knowledge/expo-symbols-vs-vector-icons.md
+→ workspaces/acme-app/knowledge/icon-library-choice.md
 
 Next: I can create the note now (run brain-reflect to route it formally),
 or you can write it yourself.
@@ -78,11 +79,11 @@ If the artifact is mixed, give a split:
 This has two pieces:
 
 1. The decision (Redis vs in-memory cache, picked Redis because…)
-   → Brain: decisions/2026-04-18-redis-cache.md (workspace gotam)
+   → Brain: decisions/2026-04-18-redis-cache.md (workspace acme-web)
    → Use: log-decision skill
 
 2. The actual cache.ts implementation
-   → Code: ~/code/smarttravel/src/cache.ts
+   → Code: ~/code/acme-web/src/cache.ts
    → Use: brain-dispatch to implement
 
 Decision goes first; implementation gets dispatched referencing the decision.

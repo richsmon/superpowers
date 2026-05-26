@@ -12,8 +12,9 @@ This skill exists because the most expensive failure mode of brain-first workflo
 ## Locate Brain Repo
 
 1. Check if current workspace is the brain (look for `AGENTS.md` + `REPO_KNOWLEDGE.md` + `graph/entities/`)
-2. If not, check siblings: `../brain`, `../../brain`, `../tam-brain`
+2. If not, check siblings: `../brain`, `../../brain`
 3. If not found, ask the user
+4. **Sync state** — `git -C <brain> pull --rebase origin main` so reflections land against fresh tracking artifacts (avoids overwriting a teammate's STATUS / tasks update). Verify `git -C <brain> branch --show-current` is `main`.
 
 ## When to Use
 
@@ -31,7 +32,7 @@ This skill exists because the most expensive failure mode of brain-first workflo
 
 The skill reads context from:
 
-1. **Today's session note** — `sessions/YYYY/MM/YYYY-MM-DD-{user}.md`
+1. **Today's session note** — `workspaces/{w}/sessions/YYYY-MM-DD-{user}.md`
 2. **The most recent "Dispatched: ..." entry** in that session, if present
 3. **Free-text takeaways** — ask the user: "What's worth remembering from this work?"
 
@@ -63,7 +64,7 @@ For task `T-NN` in workspace `W` with outcome `O`:
 
 3. **`workspaces/W/tasks.md` "Dispatch history" append:**
    - Compute next dispatch number by counting existing entries in the section
-   - Format: `- YYYY-MM-DD dispatch #N — T-NN <one-line subject> — <O> — see sessions/YYYY-MM-DD-*.md` (commit/PR link if available)
+   - Format: `- YYYY-MM-DD dispatch #N — T-NN <one-line subject> — <O> — see workspaces/{w}/sessions/YYYY-MM-DD-*.md` (commit/PR link if available)
 
 4. **`graph/entities/W.yaml` bump:** `lastUpdated:` → today's date. If `O = done`, optionally append a one-line milestone note to `content:` (do not silently rewrite history; append).
 

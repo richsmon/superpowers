@@ -26,7 +26,7 @@ You MUST create a task for each of these items and complete them in order:
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
+6. **Write design doc** — save to the brain path (`workspaces/{workspace}/features/{feature}/spec.md`) when in BRAIN MODE; otherwise `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`. Commit.
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 8. **User reviews written spec** — ask user to review the spec file before proceeding
 9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
@@ -108,8 +108,10 @@ digraph brainstorming {
 
 **Documentation:**
 
-- Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
-  - (User preferences for spec location override this default)
+- **Detect BRAIN MODE before writing.** If cwd (or `../brain`, `../../brain`) contains both `templates/feature/spec.md` and a `workspaces/` directory, you are in a brain.
+- **Brain mode write path:** `workspaces/{workspace}/features/{feature}/spec.md`. Ask the user for `{workspace}` and `{feature}` if these are not derivable from conversation context. Read `templates/feature/spec.md` from the brain for the canonical frontmatter and section layout before writing.
+- **Non-brain mode write path:** `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`.
+- (User preferences for spec location override both defaults — when the user names a specific path, honor it.)
 - Use elements-of-style:writing-clearly-and-concisely skill if available
 - Commit the design document to git
 

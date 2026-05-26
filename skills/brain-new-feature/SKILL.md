@@ -5,13 +5,14 @@ description: Use when the user wants to start a new feature inside an existing b
 
 # Brain — New Feature
 
-Creates `workspaces/{workspace}/features/{feature}/` with `spec.md` and a `plan.md` stub, ready for the `writing-plans` skill to fill in. Optionally orchestrates the full `brainstorming → write-feature-spec → writing-plans` Superpowers chain.
+Creates `workspaces/{workspace}/features/{feature}/` with `spec.md`, `design.md` and `plan.md` scaffolded from the brain repo's `templates/feature/`, ready for `write-feature-spec` / `writing-plans` to fill in. Optionally orchestrates the full `brainstorming → write-feature-spec → writing-plans` Superpowers chain.
 
 ## Locate Brain Repo
 
 1. Check if current workspace is the brain
-2. If not, check siblings: `../brain`, `../../brain`, `../tam-brain`
+2. If not, check siblings: `../brain`, `../../brain`
 3. If not found, ask the user
+4. **Sync state** — `git -C <brain> pull --rebase origin main` so the new feature scaffold is created against the latest templates and workspace state. Verify `git -C <brain> branch --show-current` is `main`.
 
 ## When to Use
 
@@ -56,72 +57,44 @@ If the user wants a simpler / faster path (skip brainstorming), proceed directly
 
 ### 3. Create the feature folder + files
 
+Copy the brain repo's canonical feature templates — do NOT hand-write them, so
+the feature stays consistent with `templates/feature/`:
+
 ```bash
 mkdir -p workspaces/{workspace}/features/{feature}
+cp templates/feature/spec.md   workspaces/{workspace}/features/{feature}/spec.md
+cp templates/feature/design.md workspaces/{workspace}/features/{feature}/design.md
+cp templates/feature/plan.md   workspaces/{workspace}/features/{feature}/plan.md
 ```
 
-`workspaces/{workspace}/features/{feature}/spec.md`:
+If `templates/feature/` is missing, abort and tell the user the brain repo
+doesn't have the feature templates yet.
 
-```markdown
-# Feature Spec: {Feature Title}
+Then substitute the template placeholders (use your environment's edit tool,
+not `sed`):
 
-**Feature ID:** {workspace}-{feature}
-**Workspace:** {workspace}
-**Domain:** {domain or TBD}
-**Priority:** {high/medium/low}
-**Status:** Drafting (created {YYYY-MM-DD})
+- `{feature-slug}` → `{feature}`
+- `{Feature Title}` → the human-readable feature title
+- `{github-username}` → the DRI's GitHub username
+- `{repo}` / `{repo-name}` → the workspace's linked code repo
+- `repos: [app]` → the workspace's repo
+- `{YYYY-MM-DD}` → today's date
 
-## Problem
+Leave `jira:` as `null` (spec) / `MC-{ticket}` (plan) — it is filled when the
+feature is routed ready-for-dev and `jira-bridge.yml` creates the Jira Epic.
 
-{What problem are we solving? Why does it matter?}
+Leave every section *body* as the template prose. Do NOT invent Goal,
+Acceptance criteria, or design content — those are for the human or the
+`write-feature-spec` skill (step 2) to fill.
 
-## Goals
-
-1. {Concrete, observable goal}
-2. ...
-
-## Success criteria
-
-- {What must be true for this feature to be considered done?}
-
-## Non-goals (out of scope)
-
-- {What we are explicitly NOT building}
-
-## Dependencies
-
-- {Other features, decisions, or systems this depends on}
-
-## References
-
-- {Related entities, decisions, external docs}
-
-## Knowledge graph impact
-
-Entities to create / update:
-- {entity ids}
-
----
-
-**Next step:** Run `writing-plans` (Superpowers) to produce `plan.md`.
-```
-
-`workspaces/{workspace}/features/{feature}/plan.md` (stub):
-
-```markdown
-# {Feature Title} — Implementation Plan
-
-**Feature:** {workspace}-{feature}
-**Status:** Plan pending — generate via `writing-plans` skill
-
-> This file will be filled in via the Superpowers `writing-plans` skill,
-> which produces small bite-sized tasks (2–5 min each) with file paths
-> and verification steps.
-```
+This skill scaffolds a **single-repo** feature (everything under
+`workspaces/{workspace}/features/{feature}/`). A cross-repo feature instead
+keeps `spec.md` at root `features/{feature}/` with per-repo `plan.md` files —
+see the "Where things live" note in the spec template.
 
 ### 4. Update workspace entity (cross-references)
 
-Open `graph/entities/{workspace}.yaml`. Append the feature to the entity's `content:` block as a reference, or add a feature-level entity if the feature is significant enough to be its own concept (e.g. `gotam-capability-token`).
+Open `graph/entities/{workspace}.yaml`. Append the feature to the entity's `content:` block as a reference, or add a feature-level entity if the feature is significant enough to be its own concept (e.g. `acme-web-auth-token`).
 
 Bump `lastUpdated:`.
 
@@ -138,8 +111,9 @@ If a session file exists for today, add:
 
 ```
 Feature `{workspace}/{feature}` created.
-- Spec: workspaces/{workspace}/features/{feature}/spec.md
-- Plan: workspaces/{workspace}/features/{feature}/plan.md (stub — fill via writing-plans)
+- Spec:   workspaces/{workspace}/features/{feature}/spec.md
+- Design: workspaces/{workspace}/features/{feature}/design.md
+- Plan:   workspaces/{workspace}/features/{feature}/plan.md
 
 Next:
 - writing-plans (Superpowers) → fill out plan.md

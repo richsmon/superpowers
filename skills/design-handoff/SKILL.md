@@ -28,6 +28,15 @@ Before anything else, find the `brain` repository:
 
 All file operations happen in the brain repo.
 
+## Git Safety Protocol
+
+Before reading or writing in the brain repo:
+
+1. **Verify the branch** — `git -C <brain> branch --show-current` should return `main`. If not, ask the user before continuing.
+2. **Pull the latest** — `git -C <brain> pull --rebase origin main` so the design doc lands against a fresh tip.
+3. **Inspect uncommitted work** — `git -C <brain> status --short`. Note anything unexpected before adding new files.
+4. **Check branch state** — `git -C <brain> log --oneline origin/main..HEAD` should be empty after pull.
+
 ## Pre-check
 
 1. Ask which feature this design is for — must match an existing `features/{feature-name}/` folder
@@ -107,8 +116,12 @@ Creates `features/{feature-name}/design.md` with this structure:
 
 ## After Creation
 
-- Do NOT commit — the design document is a draft that may be iterated on
+- Do NOT commit — the design document is a draft that may be iterated on. See "Commit Policy" below.
 - Inform user that the next step is for the CTO to run `ready-for-dev`
+
+## Commit Policy
+
+**This skill does NOT commit.** The design doc is a draft and may be iterated on. Either `brain-checkpoint` (mid-day, explicit) or `ready-for-dev` (at the gate) commits it later — never this skill.
 
 ## Red Flags
 
@@ -123,3 +136,4 @@ Creates `features/{feature-name}/design.md` with this structure:
 - `design.md` must be created alongside `spec.md` in the same feature folder
 - Both files are **required** before `ready-for-dev` can proceed
 - This skill always writes to the brain repository
+- The `/brain-design-handoff` slash command is a thin wrapper that loads this skill — they are not duplicates. The command is the entry point; this file is the spec.

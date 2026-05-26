@@ -14,8 +14,9 @@ The human partner stays in the brain. The agent works in the code repo. Results 
 Same as `log-decision` / `session-start`:
 
 1. Check if current workspace is the brain (look for `AGENTS.md` + `REPO_KNOWLEDGE.md` + `graph/entities/`)
-2. If not, check siblings: `../brain`, `../../brain`, `../tam-brain`
+2. If not, check siblings: `../brain`, `../../brain`
 3. If not found, ask the user
+4. **Sync state** — `git -C <brain> pull --rebase origin main` so the dispatched agent's context bundle (spec, decisions, related entities) reflects the real tip. Verify `git -C <brain> branch --show-current` is `main`. (Sibling code repo's git safety is the dispatched agent's responsibility, not this skill's.)
 
 ## When to Use
 
@@ -164,7 +165,7 @@ Set `parentId` and `goalId` if user provides them. Always include `X-Paperclip-R
 
 When the inline subagent returns (or after a Paperclip heartbeat completes):
 
-1. Append a "Dispatched work" entry to today's session (`sessions/YYYY/MM/YYYY-MM-DD-{user}.md`):
+1. Append a "Dispatched work" entry to today's session (`workspaces/{w}/sessions/YYYY-MM-DD-{user}.md`):
 
    ```markdown
    ### Dispatched: {workspace} — {task}

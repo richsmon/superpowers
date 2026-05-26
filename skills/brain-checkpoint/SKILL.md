@@ -5,15 +5,48 @@ description: Use when the user wants a quick mid-work commit / save / checkpoint
 
 # Brain — Checkpoint
 
-Saves the current state of the brain even when work isn't done. Detects what changed, identifies what hasn't been written down yet (session entry, unfinished todos, in-flight feature progress, stale `lastUpdated:`), prompts for the missing pieces, then commits locally.
+Saves the current state of **non-diary, non-pipeline** brain work even when it isn't done. Detects what changed, identifies what hasn't been written down yet (session entry, unfinished todos, in-flight feature progress, stale `lastUpdated:`), prompts for the missing pieces, then commits locally.
 
 This skill exists for the common case: you've been working for an hour, you need to step away (meeting, lunch, end of focused block), but you're not at a clean stopping point — and you don't want to lose context. `session-end` is too heavy for this; a raw `git commit -am "wip"` loses the state.
+
+**Scope (under the daily-bookend commit policy):** brain-checkpoint commits things like meta docs, atomic notes, spec/plan drafts, entity updates, and cleanup. It does **NOT** commit:
+
+- **Today's session diary** (`sessions/YYYY/MM/{today}-{user}.md`) — `session-end` owns that.
+- **Today's `decisions/` or `blockers/` writes from `log-decision` / `log-blocker`** — `session-end` bundles them.
+- **Pipeline-sync artifacts** (e.g. `.sync-state/`, brain-truth dumps, design→Figma sync outputs) — those land via a feature branch + PR, never via checkpoint.
+
+If `git status` shows ONLY these three categories, `brain-checkpoint` has nothing to do — defer to `session-end` (for the diary) or move pipeline work to a branch first.
 
 ## Locate Brain Repo
 
 1. Check if current workspace is the brain (look for `AGENTS.md` + `REPO_KNOWLEDGE.md` + `graph/entities/`)
-2. If not, check siblings: `../brain`, `../../brain`, `../tam-brain`
+2. If not, check siblings: `../brain`, `../../brain`
 3. If not found, ask the user
+
+## Git Safety Protocol
+
+Before snapshotting or committing:
+
+1. **Verify the branch** — `git -C <brain> branch --show-current` should return `main`. If not (e.g. you're on a pipeline-sync branch), this skill is the wrong tool — finish that branch via its PR flow instead.
+2. **Pull the latest** — `git -C <brain> pull --rebase origin main` so the checkpoint commit lands on top of teammates' work, not behind it.
+3. **Inspect uncommitted work** — `git -C <brain> status --short`. This is what step 1 of the Process formalizes; surface anything surprising.
+4. **Check branch state** — after the pull, `git -C <brain> log --oneline origin/main..HEAD` should be empty. If not, you have a prior local checkpoint that hasn't pushed — note it in the report.
+
+## Signed Commits Required
+
+**Every commit produced by this skill MUST be signed. Without a signature, do NOT commit.**
+
+Before staging anything, verify signing is configured:
+
+```bash
+git -C <brain> config --get commit.gpgsign      # must print: true
+git -C <brain> config --get user.signingkey     # must print a key id (not empty)
+git -C <brain> config --get gpg.format          # 'openpgp' (default) or 'ssh'
+```
+
+If any of those return empty / not `true`, **STOP**. Do not commit. Tell the user signing is not configured and exit. Never bypass with `--no-gpg-sign`, `-c commit.gpgsign=false`, or `commit --no-verify`.
+
+After committing, confirm: `git -C <brain> log -1 --show-signature` should show a "Good signature" line. Report the verified commit hash in the final summary.
 
 ## When to Use
 
@@ -28,6 +61,8 @@ This skill exists for the common case: you've been working for an hour, you need
 - Routine end-of-day → use `session-end` (Superpowers) — it has the fuller protocol (End of Day section, summary, push prompt)
 - Pushing to remote → this skill commits LOCALLY; pushing is explicit and not part of this skill
 - Code repos → this skill is brain-only; for linked code repos, the dispatched agent commits its own work
+- **Today's diary** (session file + today's `decisions/` / `blockers/` writes) → those wait for `session-end`
+- **Pipeline-sync work** (`.sync-state/`, brain-truth dumps, design→Figma syncs) → move that work to a feature branch and ship it via PR; do NOT bundle it into a checkpoint on main
 
 ## Process
 
@@ -40,15 +75,25 @@ git diff --stat
 git diff --cached --stat
 ```
 
-Group changes by area:
+Group changes by area, then **partition into commit-eligible vs. deferred**:
 
-- **Decisions** — `decisions/*.md`, `workspaces/*/decisions/*.md`
-- **Specs / plans** — `workspaces/*/features/*/spec.md`, `plan.md`
+**Commit-eligible** (brain-checkpoint may commit these):
+
+- **Specs / plans** — `workspaces/*/features/*/spec.md`, `plan.md` (draft additions, not gate-status flips)
 - **Knowledge** — `workspaces/*/knowledge/*.md`
 - **Entities** — `graph/entities/*.yaml`
-- **Session** — `sessions/YYYY/MM/YYYY-MM-DD-{user}.md`
 - **Meta** — `meta/*.md`, `AGENTS.md`, `REPO_KNOWLEDGE.md`, `templates/*`
+- **Past-day decisions/blockers** — `decisions/*.md` / `blockers/*.md` that were authored on an earlier date (today's writes are deferred — see below)
 - **Other** — config, `.cursor/`, etc.
+
+**Deferred** (do NOT commit here):
+
+- **Today's session file** — `sessions/{YYYY}/{MM}/{today}-{user}.md` → owned by `session-end`
+- **Today's `decisions/` writes** — files dated today, written by `log-decision` → bundled by `session-end`
+- **Today's `blockers/` writes** — files dated today, written by `log-blocker` → bundled by `session-end`
+- **Pipeline-sync artifacts** — `.sync-state/`, generated design files, brain-truth dumps → belong on a feature branch + PR
+
+If the deferred set is non-empty, **list it to the user** as "leaving these for session-end / a feature branch" and proceed only with the commit-eligible set. If the commit-eligible set is empty, this skill has nothing to do — tell the user and exit.
 
 ### 2. Identify gaps (what hasn't been written down)
 
@@ -76,13 +121,13 @@ Changes since last commit on `{branch}`:
   + 3 new files
     decisions/2026-04-18-brain-skills-in-superpowers-fork.md
     meta/brain-first-workflows.md
-    workspaces/mr-brainer/knowledge/some-note.md
+    workspaces/acme-app/knowledge/some-note.md
 
   ~ 4 modified files
     AGENTS.md (+18 / -3)
     REPO_KNOWLEDGE.md (+9 / -4)
-    sessions/2026/04/2026-04-18-richsmon.md (+24 / -0)
-    graph/entities/mr-brainer.yaml (+1 / -1)
+    workspaces/acme-app/sessions/2026-04-18-richsmon.md (+24 / -0)
+    graph/entities/acme-app.yaml (+1 / -1)
 
   - 3 deleted files
     .cursor/skills/brain-link-repo/ (workspace-scoped variant)
@@ -150,15 +195,19 @@ Show the proposed message. Ask: "commit? (y / edit / abort / split)"
 - **abort** → stop, report what would have been committed
 - **split** → guide user through splitting into multiple commits (use `git add -p` mentally, or stage groups by area)
 
-On confirmation:
+On confirmation, FIRST re-verify signing config (per "Signed Commits Required"). If unset, STOP — do not commit. Otherwise:
 
 ```bash
 cd {brain}
-git add -A
+# Stage ONLY commit-eligible paths (see step 1 partition).
+# Do NOT `git add -A` — that would pull in today's diary and any pipeline artifacts.
+git add <commit-eligible paths>
 git commit -m "$(cat <<'EOF'
 {message}
 EOF
 )"
+# Verify the signature landed.
+git log -1 --show-signature
 ```
 
 ### 6. Report
@@ -181,8 +230,23 @@ Heads up — these were added to today's "Next" section:
   - {item}
 ```
 
+## Commit Policy
+
+**This skill commits locally to `main`. The commit MUST be signed (see "Signed Commits Required" above). It does NOT push.** Push is owned by `session-end` (and only `session-end` pushes the brain repo on the daily cadence).
+
+What this commit MUST NOT contain:
+
+- Today's session file
+- Today's `decisions/` or `blockers/` writes (from `log-decision` / `log-blocker`)
+- Pipeline-sync artifacts (`.sync-state/`, generated design files, brain-truth dumps)
+
+If any of those slip in, `session-end`'s diary commit will collide with this one or duplicate entries. Partition strictly in step 1.
+
 ## Red Flags
 
+- **Auto-adding today's session file or today's decisions/blockers** — those wait for `session-end`. Use partitioned `git add`, not `git add -A`.
+- **Committing pipeline-sync work on main** — move it to a feature branch first; it ships via PR, not via checkpoint.
+- **Producing an unsigned commit.** No signature, no commit. Never use `--no-gpg-sign` or `-c commit.gpgsign=false` to push through.
 - Committing without checking if today's session reflects today's work (the brain becomes a mute archive)
 - Auto-pushing — pushing is an explicit human decision
 - Bundling clearly unrelated changes into one commit (offer to split)
@@ -190,10 +254,11 @@ Heads up — these were added to today's "Next" section:
 - Treating `wip:` as an excuse to skip writing things down — `wip:` means "I'll continue", not "I'll forget"
 - `git commit -am` shortcut without seeing the diff — always show the user what's going in
 - Force-amending the previous commit just because the message is "nicer" — only amend if the previous commit was THIS session's AND not pushed (per general git safety rules)
+- Skipping the Git Safety Protocol — committing against stale brain state or from the wrong branch.
 
 ## Notes
 
-- Local commits only. Push is explicit and not part of this skill.
+- Local commits only. Push is explicit and not part of this skill — `session-end` is the daily pusher.
 - Heavier end-of-day protocol (End of Day section, push, optional PR, Paperclip task close-outs) → use `session-end` (Superpowers).
 - This skill never touches linked code repos. Code commits happen inside the dispatched agent or by the user in the code repo itself.
-- Related: `brain-reflect` (capture learnings BEFORE checkpointing if there are unwritten insights), `session-end` (heavier end-of-day), `log-decision` (if a decision needs to be split out into its own file before commit).
+- Related: `brain-reflect` (capture learnings BEFORE checkpointing if there are unwritten insights), `session-end` (heavier end-of-day, owns the daily diary commit), `log-decision` / `log-blocker` (per-event writes that wait for session-end).

@@ -10,8 +10,9 @@ Prints a compact, scannable status of the brain so the user (or agent) can orien
 ## Locate Brain Repo
 
 1. Check if current workspace is the brain (look for `AGENTS.md` + `REPO_KNOWLEDGE.md` + `graph/entities/`)
-2. If not, check siblings: `../brain`, `../../brain`, `../tam-brain`
+2. If not, check siblings: `../brain`, `../../brain`
 3. If not found, ask the user
+4. **Sync state** — `git -C <brain> pull --rebase origin main` so the status reflects the real tip. Verify `git -C <brain> branch --show-current` is `main`.
 
 ## When to Use
 
@@ -26,7 +27,7 @@ Read or enumerate (don't read every file fully — use globs):
 
 1. `REPO_KNOWLEDGE.md` — Active Workspaces table, Recent Decisions list
 2. `graph/entities/*.yaml` — for each entity with `type: project`, extract `repo:` block (linked path + URL) if present
-3. `sessions/YYYY/MM/YYYY-MM-DD-{user}.md` — today's session (if exists)
+3. `workspaces/*/sessions/YYYY-MM-DD-{user}.md` — today's session (if exists)
 4. `decisions/` — last 5 by date (sorted desc by filename)
 5. For each workspace, count:
    - features in `workspaces/{name}/features/*/` (with spec.md)
@@ -47,17 +48,17 @@ Compact markdown. NOT a wall of text. Target: fits one screen.
 
 | Workspace     | Repo linked?                      | Features | Decisions | Notes |
 |---------------|-----------------------------------|----------|-----------|-------|
-| `mr-brainer`  | ~/code/mr-brainer (planned)       | 1        | 4         | 2     |
-| `gotam`       | ~/code/smarttravel                | 3        | 0         | 0     |
+| `acme-app`    | ~/code/acme-app (planned)         | 1        | 4         | 2     |
+| `acme-web`    | ~/code/acme-web                   | 3        | 0         | 0     |
 | `paperclip`   | (no repo link)                    | 0        | 0         | 0     |
 
 ## Recent decisions (last 5)
 
-- 2026-04-18 mr-brainer-over-obsidian (top-level)
+- 2026-04-18 redis-cache-over-memcached (top-level)
 - 2026-04-18 pinned-deps-policy (top-level)
-- 2026-04-18 expo-stack (mr-brainer)
-- 2026-04-18 pure-xcode-no-eas (mr-brainer)
-- 2026-04-16 universal-brain-adoption (top-level)
+- 2026-04-18 api-versioning-scheme (acme-app)
+- 2026-04-18 ci-runner-choice (acme-app)
+- 2026-04-16 brain-workflow-adoption (top-level)
 
 ## Suggested next actions
 - {derived from session 'Next' section if present}
