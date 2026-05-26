@@ -2,8 +2,8 @@
   "name": "rs-superpowers-dev",
   "description": "Development marketplace for Superpowers core skills library",
   "owner": {
-    "name": "Jesse Vincent",
-    "email": "jesse@fsck.com"
+    "name": "Richard Smondrk",
+    "email": "8994621+richsmon@users.noreply.github.com"
   },
   "plugins": [
     {
@@ -12,8 +12,8 @@
       "version": "0.1.0",
       "source": "./",
       "author": {
-        "name": "Jesse Vincent",
-        "email": "jesse@fsck.com"
+        "name": "Richard Smondrk",
+        "email": "8994621+richsmon@users.noreply.github.com"
       }
     }
   ]
