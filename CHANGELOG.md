@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0] - 2026-05-30
+
+### Changed
+
+- **brain-next** now selects from the deterministic `## Active front` table when a workspace's `tasks.md` has one: candidate pool = the `{PREFIX}-NNN` rows, dependency satisfaction read from the `Deps` column, ready tasks ordered by `Prio` then `ID`. Legacy phase-scope / roadmap behaviour kept as a fallback for workspaces without an Active front. Output and red flags are now id-agnostic and prio-aware. Aligns the skill with the tam-brain deterministic task-id scheme (ADR `decisions/2026-05-30-deterministic-task-id-scheme.md`).
+
 ## [richsmon-fork] - 2026-04-18
 
 ### Added (fork-only — brain-first workflow)
