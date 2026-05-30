@@ -46,26 +46,29 @@ For each `workspaces/*/STATUS.md` that exists:
 
 ### 2. Score candidate tasks within each active phase
 
-Read the phase's "Scope — tasks in this phase" table. For each task ID listed, look up that row in `tasks.md`:
+**Candidate pool — prefer the deterministic Active front:**
 
-Priority order (highest first):
+- If the workspace's `tasks.md` has an `## Active front` table (the `{PREFIX}-NNN` scheme — see `decisions/2026-05-30-deterministic-task-id-scheme.md`), **that table IS the candidate pool.** Each row already carries `Phase`, `Kind`, `Area`, `Deps`, `Prio`, `Status` — do not cross-reference the phase scope table. Scope to the active phase via the row's `Phase` column.
+- Otherwise (legacy workspace, no Active front): read the active phase's "Scope — tasks in this phase" table for task IDs and look each up in `tasks.md`.
 
-1. **`in-progress`** — finish before starting new. If multiple, recommend the one with the most recent `Updated` date (continuation wins over context-switch).
-2. **`planned`** with all dependencies satisfied — a dependency is satisfied iff every task ID it depends on has `status: done` in `tasks.md`. Pick lowest `T-NN`.
-3. **`blocked`** — surface separately at end with the blocker reason from the `Notes` field. NEVER recommend a blocked task as next action; surface only so the human knows.
+**Selection (deterministic — the same `tasks.md` always yields the same pick):**
 
-Skip from the recommendation pool: `done`, `archived`, and `planned`-but-deps-unsatisfied (those go in a "waiting on" footnote).
+1. **`in-progress`** first — finish before starting new. If multiple, recommend lowest `Prio` (blank sorts last), then most recent `Updated`. Continuation beats context-switch.
+2. **`planned` that is "ready"** — every id in its `Deps` has `status: done`. A dep id is matched anywhere in `tasks.md` (including frozen-history rows); deps may reference any scheme (`G-`, `T-`, `P3-`). Among ready tasks, order by **`Prio` ascending (blank sorts last), then `ID` ascending**; pick the first.
+3. **`blocked`** and **`planned`-with-unmet-deps** — surface separately at the end (with the blocker reason / the unmet dep id). NEVER recommend; surface for awareness only.
 
-Dependencies live in `architecture/roadmap.md` "Depends on" column or in the per-task plan front-matter. If neither is parseable, fall back to `tasks.md` `Notes` field where dependencies are often noted as "depends on T-NN".
+Skip entirely: `done`, `superseded`, `deferred`, `archived`.
+
+**Dependency source:** the `Deps` column of the Active front table. Legacy fallback (no Active front): `architecture/roadmap.md` "Depends on" column, per-task plan front-matter, or `tasks.md` `Notes` ("depends on T-NN"). **`Prio` is a soft preference among ready tasks, never a blocker.**
 
 ### 3. Build context preview for the recommended task
 
-For the chosen task, surface what `brain-dispatch --task T-NN` would auto-bundle. Do NOT actually open or read every file — just confirm existence and report:
+For the chosen task, surface what `brain-dispatch --task {id}` would auto-bundle. Do NOT actually open or read every file — just confirm existence and report:
 
-- Plan file path from `tasks.md` `Plan` column (existence-check it)
-- Related feature plan (`workspaces/W/features/{slug}/plan.md` if any feature folder mentions this task ID)
-- Last dispatch outcome from `tasks.md` "Dispatch history" section (latest entry mentioning this T-NN)
-- Last `Verified` date from the row
+- Plan / ADR path from the `Plan / ADR` (Active front) or `Plan` (legacy) column (existence-check it)
+- Related feature plan (`workspaces/W/features/{slug}/plan.md` if any feature folder mentions this task id — match the `was:` id too, since plans may predate the migration)
+- Last dispatch outcome from `tasks.md` "Dispatch history" section (latest entry mentioning this id, or its `was:` id)
+- Last `Verified` date from the row (if present)
 - STATUS snapshot summary: `{N} in-flight, {M} recently shipped`
 
 ### 4. Output format
@@ -75,33 +78,36 @@ Workspace: {W}
 Active phase: Phase {N} — {theme}
               → workspaces/{W}/phases/phase-{N}-{slug}.md
 
-Recommended next: {T-NN} — {title}
-  Status: {status}
-  Plan: {workspaces/W/architecture/plans/{domain}/{task}.md}
+Recommended next: {id} — {title}
+  Status: {status}    Kind: {kind}    Area: {area}    Prio: {prio}
+  Plan / ADR: {path or "—"}
+  Deps: {"none" | "all done" | listed}
   Last verified: {YYYY-MM-DD or "never"}
-  Last dispatch: {YYYY-MM-DD dispatch #N — outcome} or "never"
-  Why this one: {"in-progress, continue" | "lowest planned T-NN with deps met"}
+  Last dispatch: {YYYY-MM-DD — {id} → outcome} or "never"
+  Why this one: {"in-progress, continue" | "ready (all deps done), lowest prio then id"}
 
 Context brain-dispatch would auto-bundle if invoked:
-  - {plan path}
+  - {plan / ADR path}
   - {feature plan path or "(no related feature)"}
   - STATUS snapshot ({N} in-flight, {M} recently shipped)
-  - Dispatch history for {T-NN}: {N} prior entries
+  - Dispatch history for {id}: {N} prior entries
   - Active phase scope + success criteria
 
 Recommended action:
-  brain-dispatch --task {T-NN}
+  brain-dispatch --task {id}
   (or: continue editing manually if you're already mid-edit)
 
-Other tasks in scope (in-phase candidates not picked):
-  - {T-NN} planned (deps met) — {title}
-  - {T-NN} planned (waiting on T-NN done) — {title}
+Other tasks in scope (ready, not picked — by prio then id):
+  - {id} planned (deps met, prio {p}) — {title}
+
+Waiting on deps (not yet ready):
+  - {id} planned (waiting on {dep-id} done) — {title}
 
 Blocked in scope (do not recommend; surfaced for awareness):
-  - {T-NN} blocked — {blocker reason from Notes}
+  - {id} blocked — {blocker reason from Notes}
 
 Other workspaces with active phases:
-  - {W2}: Phase {N} → {T-NN} (use `brain-next --workspace {W2}` for full preview)
+  - {W2}: Phase {N} → {id} (use `brain-next --workspace {W2}` for full preview)
 ```
 
 If running with `--workspace W`, omit "Other workspaces" section.
@@ -153,6 +159,8 @@ WARNING: {N} tasks in-progress in this phase. Context-switching is expensive.
 - Recommending an in-progress task be skipped for a planned one (always finish in-progress first; the only way to skip is human override)
 - Suggesting a `blocked` task as next action without surfacing the blocker reason
 - Picking a task whose dependencies aren't met
+- Reading deps from the wrong place when an `## Active front` table exists — its `Deps` column is authoritative; do NOT fall back to roadmap/Notes there
+- Picking by `ID` when a ready task with a lower `Prio` exists (prio wins among ready tasks; id is only the tiebreak)
 - Cross-workspace recommendation when current cwd implies a specific workspace (focus, don't distract — default to that workspace)
 - Reading `archive/` folders to look up old context (per `MEMORY.md` archive contract)
 
